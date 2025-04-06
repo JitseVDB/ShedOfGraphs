@@ -1,0 +1,40 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+myenv/
+env/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE and Editor folders
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs and temp
+*.log
+*.tmp
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Nauty binaries (if compiled)
+nauty2_*/dreadnaut
+nauty2_*/*.o
+nauty2_*/*.obj
+nauty2_*/*.exe
+nauty2_*/*.out
+
+# Archive files
+*.tar.gz
+*.zip
+*.7z
