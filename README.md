@@ -34,7 +34,9 @@ The program reads graphs in the graph6 format, processes them, and outputs only 
 
 ## Usage
 
-To use the filter, provide a filter string and pipe graph6 data into the program:
+To use the filter, you can run the provided **Bash script**, `run_filter.sh`, which simplifies the process of generating graphs and filtering them.
+
+### Usage with the `run_filter.sh` script:
 
 ```bash
-geng 6 | python filter_graph.py '[{"degree_sum": 6, "type": "min", "count": 3}]'
+./run_filter.sh 6 '[{"degree_sum": 6, "type": "min", "count": 3}]'
