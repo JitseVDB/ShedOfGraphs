@@ -1,3 +1,6 @@
+# Ignore history file
+history.txt
+
 # Python cache
 __pycache__/
 *.py[cod]
