@@ -1,3 +1,7 @@
+from history import HistoryEntry
+from history_management import save_entry
+
+
 """
 filter_graph.py
 
@@ -140,6 +144,26 @@ def satisfies_all_rules(G, rules):
     return True
 
 def main():
+    """
+    Main entry point of the script.
+
+    Reads graphs in graph6 format from standard input and filters them based on a JSON-formatted
+    filter string provided as a command-line argument. For each graph that passes the filter,
+    the graph6 string is printed to standard output.
+
+    Additionally, a history entry is recorded in 'history.txt' containing:
+        - Timestamp of processing
+        - Number of input graphs
+        - Number of graphs that passed the filter
+        - The filter string used
+        - The 20 most recent passing graphs
+
+    Usage:
+        python filter_graph.py '<filter_string>'
+
+    Example:
+        python filter_graph.py '[{"degree_sum": 6, "type": "min", "count": 2}]'
+    """
     if len(sys.argv) != 2:
         print("Usage: python filter_graph.py '<filter_string>'")
         sys.exit(1)
@@ -147,13 +171,29 @@ def main():
     filter_str = sys.argv[1]
     rules = parse_rules(filter_str)
 
+    input_count = 0
+    output_count = 0
+    passed_graphs = []
+
     for line in sys.stdin:
         line = line.strip()
         if not line:
             continue
+        input_count += 1
         G = nx.from_graph6_bytes(line.encode())
         if satisfies_all_rules(G, rules):
             print(line)
+            output_count += 1
+            passed_graphs.append(line)
+
+    # Save history after processing
+    entry = HistoryEntry(
+        input_number=input_count,
+        output_number=output_count,
+        filter_str=filter_str,
+        passed_graph_list=passed_graphs
+    )
+    save_entry(entry)
 
 if __name__ == "__main__":
     main()
