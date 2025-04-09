@@ -1,5 +1,5 @@
 from history import HistoryEntry
-from history_management import save_entry
+from history_management import save_history
 
 
 """
@@ -193,7 +193,7 @@ def main():
         filter_str=filter_str,
         passed_graph_list=passed_graphs
     )
-    save_entry(entry)
+    save_history([entry])
 
 if __name__ == "__main__":
     main()
