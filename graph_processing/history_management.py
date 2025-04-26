@@ -1,5 +1,5 @@
 import os
-from history import HistoryEntry
+from graph_processing.history import HistoryEntry
 
 HISTORY_FILE = "history.txt"
 

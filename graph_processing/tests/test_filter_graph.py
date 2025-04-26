@@ -38,7 +38,7 @@ def test_matches_rule_invalid():
 def test_satisfies_all_rules_valid():
     """Test that a graph satisfying the minimum number of matching edges passes."""
     G = nx.Graph()
-    G.add_edges_from([(0, 1), (1, 2), (2, 3)])
+    G.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3)])
     rule = {"degree_sum": 5, "type": "min", "count": 2}
     assert satisfies_all_rules(G, [rule])
 
