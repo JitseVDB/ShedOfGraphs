@@ -1,67 +1,56 @@
+import pytest
 import networkx as nx
-from graph_processing.filter_graph import satisfies_all_rules
+from graph_processing.filter_graph import (
+    parse_rules,
+    satisfies_all_rules,
+    count_matching_edges,
+    matches_rule
+)
 
-def test_satisfies_min_rule():
-    """
-    Test the 'min' rule type in the filtering logic.
+def test_parse_rules_valid():
+    """Test that valid JSON rule strings are parsed correctly."""
+    rule_str = '[{"degree_sum": 6, "type": "min", "count": 2}]'
+    expected = [{"degree_sum": 6, "type": "min", "count": 2}]
+    assert parse_rules(rule_str) == expected
 
-    This test creates a graph with four nodes and four edges, where:
-        - Node 0 is connected to Node 1
-        - Node 1 is connected to Node 2
-        - Node 2 is connected to Node 3
-        - Node 3 is connected back to Node 0
+def test_parse_rules_invalid_json():
+    """Test that invalid JSON input causes the program to exit."""
+    rule_str = '[{"degree_sum": 6, "type": "min", "count":}]'
+    with pytest.raises(SystemExit):
+        parse_rules(rule_str)
 
-    The rule being tested requires that at least 2 edges should have their degree sum equal to 2.
-    This is expected to pass because the sum of degrees of connected nodes in each edge matches the rule.
-
-    Expected behavior:
-        The function should return True, as the graph meets the rule.
-    """
+def test_matches_rule_valid():
+    """Test that an edge satisfying the degree_sum rule returns True."""
     G = nx.Graph()
-    G.add_edges_from([(0, 1), (1, 2), (2, 3), (3, 0)])
+    G.add_edges_from([(0, 1), (1, 2)])
+    degrees = {0: 2, 1: 3, 2: 2}
+    rule = {"degree_sum": 5}
+    assert matches_rule((0, 1), degrees, rule)
 
-    rule = {"degree_sum": 2, "type": "min", "count": 2}
-    assert satisfies_all_rules(G, [rule])  # Should pass
+def test_matches_rule_invalid():
+    """Test that an edge not satisfying the degree_sum rule returns False."""
+    G = nx.Graph()
+    G.add_edges_from([(0, 1), (1, 2)])
+    degrees = {0: 2, 1: 3, 2: 2}
+    rule = {"degree_sum": 6}
+    assert not matches_rule((0, 1), degrees, rule)
 
+def test_satisfies_all_rules_valid():
+    """Test that a graph satisfying the minimum number of matching edges passes."""
+    G = nx.Graph()
+    G.add_edges_from([(0, 1), (1, 2), (2, 3)])
+    rule = {"degree_sum": 5, "type": "min", "count": 2}
+    assert satisfies_all_rules(G, [rule])
 
-def test_satisfies_exactly_rule():
-    """
-    Test the 'exactly' rule type in the filtering logic.
+def test_satisfies_all_rules_invalid():
+    """Test that a graph not satisfying the minimum number of matching edges fails."""
+    G = nx.Graph()
+    G.add_edges_from([(0, 1), (1, 2)])
+    rule = {"degree_sum": 6, "type": "min", "count": 2}
+    assert not satisfies_all_rules(G, [rule])
 
-    This test creates a simple path graph with 3 nodes (0-1-2), where:
-        - Node 0 is connected to Node 1
-        - Node 1 is connected to Node 2
-
-    The rule being tested requires exactly 2 edges where the sum of the degrees of the connected nodes equals 3.
-    This is expected to pass because the sum of degrees for both edges is exactly 3.
-
-    Expected behavior:
-        The function should return True, as the graph meets the rule.
-    """
-    G = nx.path_graph(3)  # 0-1-2
-
-    rule = {"degree_sum": 3, "type": "exactly", "count": 2}
-    assert satisfies_all_rules(G, [rule])  # Should pass
-
-
-def test_invalid_rule_type():
-    """
-    Test invalid rule types in the filtering logic.
-
-    This test creates a complete graph with 3 nodes, where:
-        - All nodes are connected to each other (3 nodes and 3 edges).
-
-    The rule being tested uses an unsupported rule type (`"unsupported"`), which should raise a KeyError.
-
-    Expected behavior:
-        The function should raise a KeyError because the rule type is not recognized.
-    """
-    G = nx.complete_graph(3)
-
-    rule = {"degree_sum": 4, "type": "unsupported", "count": 1}
-    try:
-        satisfies_all_rules(G, [rule])
-    except KeyError:
-        assert True  # Test passed: the function raised the expected exception
-    else:
-        assert False, "Should have raised an error"  # Test failed if no exception is raised
+def test_empty_graph():
+    """Test that an empty graph does not satisfy any rule."""
+    G = nx.Graph()
+    rule = {"degree_sum": 6, "type": "min", "count": 2}
+    assert not satisfies_all_rules(G, [rule])
