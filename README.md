@@ -66,3 +66,19 @@ Each line in the `history.txt` file represents a batch of processed graphs:
 - `<outputNumber>`: The number of graphs that passed the filter.
 - `<filter>`: The filter string applied.
 - `<passedGraphList>`: The 20 most recent passed graphs (graph6 strings).
+
+## Setting up Automatic Backups
+
+To set up automatic backups of the history file, follow these steps:
+
+1. Ensure you have `python3` installed and the `backup_history.py` script is located at `/home/ShedOfGraphs/history_backup/backup_history.py`.
+
+2. Add the following cron job to run the backup script every hour:
+   ```bash
+   crontab -e
+
+Then add this line to the crontab file:
+
+```bash
+0 * * * * /usr/bin/python3 /home/ShedOfGraphs/history_backup/backup_history.py
+```
