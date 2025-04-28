@@ -66,3 +66,81 @@ Each line in the `history.txt` file represents a batch of processed graphs:
 - `<outputNumber>`: The number of graphs that passed the filter.
 - `<filter>`: The filter string applied.
 - `<passedGraphList>`: The 20 most recent passed graphs (graph6 strings).
+
+## Setting up Automatic Backups
+
+To set up automatic backups of the history file, follow these steps:
+
+1. Ensure you have `python3` installed and the `backup_history.py` script is located at `/home/ShedOfGraphs/history_backup/backup_history.py`.
+
+2. Add the following cron job to run the backup script every hour:
+   ```bash
+   crontab -e
+
+Then add this line to the crontab file:
+
+```bash
+0 * * * * /usr/bin/python3 /home/ShedOfGraphs/history_backup/backup_history.py
+```
+
+## **Setting Up Plantri**
+
+To use the graph generation and filtering scripts in this project, you need to install **Plantri**. Below is a step-by-step guide to set it up.
+
+### **1. Download Plantri**
+
+1. **Visit the Plantri website** or use the following link: [Plantri GitHub or official site](http://www.maths.qmul.ac.uk/~pjc/plantri/).
+2. Download the **tar.gz** file for Plantri (e.g., `plantri55.tar.gz`).
+
+### **2. Extract the Files**
+
+Once the **tar.gz** file is downloaded, follow these steps to extract it:
+
+```bash
+tar -xzvf plantri55.tar.gz
+```
+
+This will extract the contents into a folder named `plantri55`.
+
+### **3. Compile Plantri**
+
+Navigate to the extracted folder and run the `make` command to compile Plantri:
+
+```bash
+cd plantri55
+make
+```
+
+This will generate the `plantri` executable.
+
+### **4. Move Plantri to a Global Directory (Optional)**
+
+If you want to run `plantri` from anywhere on your system, move it to a directory in your `PATH` (e.g., `/usr/local/bin/`):
+
+```bash
+sudo mv plantri /usr/local/bin/
+```
+
+### **5. Test Plantri**
+
+To verify that Plantri is installed correctly, run:
+
+```bash
+plantri
+```
+
+This should display the Plantri command-line interface, confirming that it’s working properly.
+
+### **6. Usage Example**
+
+You can now use Plantri to generate graphs. For example, to generate graphs with 6 vertices and the symmetry `res=0 mod=4`, run:
+
+```bash
+plantri 6 0 4
+```
+
+You can also output the graphs to a file:
+
+```bash
+plantri 6 0 4 output.g6
+```
