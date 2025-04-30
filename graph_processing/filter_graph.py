@@ -1,6 +1,6 @@
-from graph_processing.history import HistoryEntry
+from history import HistoryEntry
 
-from graph_processing.history_management import save_history
+from history_management import save_history
 
 
 """
