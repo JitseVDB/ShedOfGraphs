@@ -22,4 +22,5 @@ jobs:
 
     - name: Run tests
       run: |
-        PYTHONPATH=./ pytest graph_processing/tests --maxfail=1 --disable-warnings -q
+        PYTHONPATH=.:./graph_processing pytest graph_processing/tests --maxfail=1 --disable-warnings -q
+
