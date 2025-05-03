@@ -4,7 +4,7 @@ backup_history.py
 
 This script creates a timestamped backup of the history file used in ShedOfGraphs.
 
-- Source file: ~/ShedOfGraphs/graph_processing/history.txt
+- Source file: ~/ShedOfGraphs/history.txt
 - Backup destination: ~/ShedOfGraphs/.filtered-graphs/
 - Backup filename format: history_YYYYMMDD_HHMM.txt
 
@@ -20,7 +20,7 @@ def main():
     Main function to perform the backup operation.
     """
     # Define source and destination paths
-    source_file = os.path.expanduser('~/ShedOfGraphs/graph_processing/history.txt')
+    source_file = os.path.expanduser('~/ShedOfGraphs/history.txt')
     backup_dir = os.path.expanduser('~/ShedOfGraphs/.filtered-graphs/')
 
     # Ensure that the backup directory exists
