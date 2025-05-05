@@ -131,12 +131,14 @@ def satisfies_all_rules(G, rules):
 
     Returns:
         bool: True if all rules are satisfied, False otherwise.
-
-    Example rule:
-        {"degree_sum": 6, "type": "min", "count": 3}
-        -> at least 3 edges must have endpoints whose degree sum is 6
     """
+    valid_types = {"min", "max", "exactly"}
+    
     for rule in rules:
+        # Check if the rule contains a valid type
+        if rule["type"] not in valid_types:
+            raise KeyError(f"Invalid rule type: {rule['type']}")
+
         count = count_matching_edges(G, rule)
         if rule["type"] == "min" and count < rule["count"]:
             return False

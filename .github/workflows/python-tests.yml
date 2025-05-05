@@ -1,26 +1,29 @@
-name: Run Python Tests
+name: Run Python tests
 
-on: [push, pull_request]  # Run on every push and every pull request
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]  # Removed 3.1
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'  # Match your local Python version
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest networkx  # Add any other packages you need
+        pip install networkx
 
-    - name: Run tests
+    - name: Run unittests
       run: |
-        PYTHONPATH=.:./graph_processing pytest graph_processing/tests --maxfail=1 --disable-warnings -q
-
+        python -m unittest discover -s ShedOfGraphs/graph_processing/tests
