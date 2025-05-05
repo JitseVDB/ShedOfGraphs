@@ -1,5 +1,10 @@
-from history import HistoryEntry
+import sys
+import json
+import networkx as nx
+import argparse
 
+from history import HistoryEntry
+from export_graph6toImage import export_graph_image
 from history_management import save_history
 
 
@@ -25,10 +30,6 @@ Example:
 
 Version: 1.0
 """
-
-import sys
-import json
-import networkx as nx
 
 def parse_rules(rule_str):
     """
@@ -144,32 +145,31 @@ def satisfies_all_rules(G, rules):
             return False
     return True
 
+def parse_args():
+    """
+    Parses command line arguments to allow the user to specify filter string,
+    export options (image folder and format), and other flags.
+    """
+    parser = argparse.ArgumentParser(description='Filter graphs and optionally export images.')
+    
+    # Optional arguments for exporting images
+    parser.add_argument('filter_string', type=str, help="The filter string in JSON format.")
+    parser.add_argument('--export', metavar='FOLDER', type=str, help="Export filtered graphs as images to the specified folder.")
+    parser.add_argument('--image', metavar='FORMAT', type=str, choices=['png', 'jpg', 'svg'], help="The image format for export.")
+    
+    return parser.parse_args()
+
 def main():
     """
     Main entry point of the script.
-
-    Reads graphs in graph6 format from standard input and filters them based on a JSON-formatted
-    filter string provided as a command-line argument. For each graph that passes the filter,
-    the graph6 string is printed to standard output.
-
-    Additionally, a history entry is recorded in 'history.txt' containing:
-        - Timestamp of processing
-        - Number of input graphs
-        - Number of graphs that passed the filter
-        - The filter string used
-        - The 20 most recent passing graphs
-
-    Usage:
-        python filter_graph.py '<filter_string>'
-
-    Example:
-        python filter_graph.py '[{"degree_sum": 6, "type": "min", "count": 2}]'
     """
-    if len(sys.argv) != 2:
-        print("Usage: python filter_graph.py '<filter_string>'")
+    args = parse_args()
+    
+    if args.export and not args.image:
+        print("Error: You must specify an image format using --image (e.g., png, jpg, svg).")
         sys.exit(1)
 
-    filter_str = sys.argv[1]
+    filter_str = args.filter_string
     rules = parse_rules(filter_str)
 
     input_count = 0
@@ -182,19 +182,19 @@ def main():
             continue
         input_count += 1
         G = nx.from_graph6_bytes(line.encode())
+        
         if satisfies_all_rules(G, rules):
             print(line)
             output_count += 1
             passed_graphs.append(line)
+            
+            if args.export:
+                # Export the image directly to the folder provided after --export
+                export_graph_image(line, args.image, args.export)
 
-    # Save history after processing
-    entry = HistoryEntry(
-        input_number=input_count,
-        output_number=output_count,
-        filter_str=filter_str,
-        passed_graph_list=passed_graphs
-    )
-    save_history([entry])
+    # Optionally save history after processing
+    # history_entry = HistoryEntry(...)
+    # save_history([history_entry])
 
 if __name__ == "__main__":
     main()

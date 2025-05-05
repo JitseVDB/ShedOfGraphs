@@ -1,13 +1,27 @@
 #!/bin/bash
 
-# Check that we have exactly 2 arguments
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 <order> <filter_string>"
+# Check that we have exactly 2 arguments (order and filter_string)
+if [ "$#" -lt 2 ]; then
+  echo "Usage: $0 <order> <filter_string> [--export <folder_path>] [--image <format>]"
   exit 1
 fi
 
 ORDER=$1
 FILTER_STRING=$2
+EXPORT_FOLDER=""
+IMAGE_FORMAT=""
+
+# Check if the third argument is --export, then grab the folder path
+if [ "$3" == "--export" ]; then
+  EXPORT_FOLDER=$4
+  shift 2  # Shift to the next argument
+fi
+
+# Check if the next argument is --image, then grab the image format
+if [ "$3" == "--image" ]; then
+  IMAGE_FORMAT=$4
+  shift 2  # Shift to the next argument
+fi
 
 # Print info about history tracking
 echo "Running filter for graphs of order $ORDER with filter:"
@@ -32,7 +46,11 @@ for batch_file in $OUTPUT_DIR/graph_batch_*; do
     BATCH_NUMBER=$(basename $batch_file | sed 's/graph_batch_//')
     
     # Run each filter in parallel, outputting to separate files in the project directory
-    python3 ./filter_graph.py "$FILTER_STRING" < "$batch_file" > "$OUTPUT_DIR/output_batch_$BATCH_NUMBER.txt" &
+    if [ -n "$EXPORT_FOLDER" ]; then
+        python3 ./filter_graph.py "$FILTER_STRING" --export "$EXPORT_FOLDER" --image "$IMAGE_FORMAT" < "$batch_file" > "$OUTPUT_DIR/output_batch_$BATCH_NUMBER.txt" &
+    else
+        python3 ./filter_graph.py "$FILTER_STRING" < "$batch_file" > "$OUTPUT_DIR/output_batch_$BATCH_NUMBER.txt" &
+    fi
 done
 
 # Wait for all parallel jobs to finish
