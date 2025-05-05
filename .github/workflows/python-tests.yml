@@ -1,29 +1,41 @@
-name: Run Python tests
+name: Python CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main  # Trigger the pipeline on push to the 'main' branch
+  pull_request:
+    branches:
+      - main  # Trigger the pipeline on pull requests to the 'main' branch
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: [3.9, 3.10, 3.11]  # Removed 3.1
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.12'  # Use Python 3.12 (networkx requires 3.10/3.11/3.12)
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install networkx
+        python -m venv myenv  # Create the virtual environment in the root directory
+        source myenv/bin/activate  # Activate it from the root directory
+        pip install --upgrade pip
+        pip install -r requirements.txt  # Ensure you have a 'requirements.txt' with necessary dependencies
 
-    - name: Run unittests
+    - name: Run filter graph tests
       run: |
-        python -m unittest discover -s ShedOfGraphs/graph_processing/tests
+        source myenv/bin/activate  # Activate the virtual environment from the root
+        cd ShedOfGraphs/graph_processing  # Change to the graph_processing directory
+        python3 -m tests.test_filter_graph  # Run the tests
+
+    - name: Run history tests
+      run: |
+        source myenv/bin/activate  # Activate the virtual environment from the root
+        cd ShedOfGraphs/graph_processing  # Change to the graph_processing directory
+        python3 -m tests.test_history  # Run the tests
