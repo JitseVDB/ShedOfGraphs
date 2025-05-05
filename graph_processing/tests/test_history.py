@@ -1,68 +1,73 @@
-from graph_processing.history import HistoryEntry
-from graph_processing.history_management import load_history, save_history
+import unittest
 import os
+from history import HistoryEntry
+from history_management import load_history, save_history, HISTORY_FILE
 
-def test_history_entry():
-    """
-    Test that a HistoryEntry object correctly formats itself
-    into a tab-separated string with all necessary information.
-    """
-    entry = HistoryEntry(
-        input_number=10,
-        output_number=5,
-        filter_str="degree-sum filter",
-        passed_graph_list=["graph1", "graph3", "graph5"]
-    )
+class TestHistory(unittest.TestCase):
 
-    # Test the tab-delimited output of the entry
-    line = entry.to_line()
-    assert line.startswith("20")  # Should start with the year in the timestamp
-    assert "\t10\t5\tdegree-sum filter\tgraph1,graph3,graph5" in line
+    def setUp(self):
+        # Backup existing history file if it exists
+        self.backup = None
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                self.backup = f.read()
+            os.remove(HISTORY_FILE)  # Start fresh for testing
 
-def test_save_history():
-    """
-    Test saving a list of HistoryEntry objects to 'history.txt'
-    and verify that they are correctly written and can be reloaded.
-    """
-    entry = HistoryEntry(
-        input_number=10,
-        output_number=5,
-        filter_str="degree-sum filter",
-        passed_graph_list=["graph1", "graph3", "graph5"]
-    )
+    def tearDown(self):
+        # Restore history file if backup was made
+        if self.backup is not None:
+            with open(HISTORY_FILE, 'w') as f:
+                f.write(self.backup)
+        elif os.path.exists(HISTORY_FILE):
+            os.remove(HISTORY_FILE)
 
-    # Save the entry to history.txt
-    save_history([entry])
+    def test_history_entry_to_line(self):
+        entry = HistoryEntry(10, 5, '[{"type": "min", "degree_sum": 6, "count": 2}]', ["G1", "G2"])
+        line = entry.to_line()
+        parts = line.strip().split('\t')
+        self.assertEqual(len(parts), 5)
+        self.assertEqual(parts[1], "10")
+        self.assertEqual(parts[2], "5")
+        self.assertEqual(parts[3], '[{"type": "min", "degree_sum": 6, "count": 2}]')
+        self.assertEqual(parts[4], "G1,G2")
 
-    # Ensure the history file was created
-    assert os.path.exists("history.txt")
+    def test_save_and_load_history(self):
+        entry1 = HistoryEntry(3, 2, "filterA", ["A", "B"])
+        entry2 = HistoryEntry(5, 3, "filterB", ["C", "D", "E"])
+        save_history([entry1, entry2])
 
-    # Load the saved history and check content
-    history = load_history()
-    assert len(history) == 1
-    assert history[0].input_number == 10
-    assert history[0].output_number == 5
+        loaded = load_history()
+        self.assertEqual(len(loaded), 2)
+        self.assertEqual(loaded[0].input_number, 3)
+        self.assertEqual(loaded[1].output_number, 3)
+        self.assertEqual(loaded[1].passed_graph_list, ["C", "D", "E"])
 
-def test_load_history_empty_file():
-    """
-    Test that loading history from an empty 'history.txt' file
-    correctly returns an empty list without errors.
-    """
-    # Ensure the history file is empty
-    if os.path.exists("history.txt"):
-        os.remove("history.txt")
-    
-    history = load_history()
-    assert len(history) == 0  # No entries should be loaded
+    def test_load_history_with_invalid_lines(self):
+        # Write some invalid entries to the history file
+        with open(HISTORY_FILE, 'w') as f:
+            f.write("2025-05-05 12:00:00\t3\t2\tfilterA\tG1,G2\n")
+            f.write("INVALID LINE WITH TOO FEW FIELDS\n")
+            f.write("2025-05-05 12:00:01\t5\t3\tfilterB\tG3,G4,G5\n")
 
-def test_incomplete_history_data():
-    """
-    Test that loading malformed/incomplete history data
-    (missing passed graphs list) results in no loaded entries.
-    """
-    # Create a malformed history entry
-    with open("history.txt", "w") as f:
-        f.write("2025-04-26 12:00:00\t10\t5\tdegree-sum filter\n")  # Missing passed_graph_list field
+        history = load_history()
+        self.assertEqual(len(history), 2)
+        self.assertEqual(history[0].filter_str, "filterA")
+        self.assertEqual(history[1].passed_graph_list, ["G3", "G4", "G5"])
 
-    history = load_history()
-    assert len(history) == 0  # Malformed entry should be skipped or cause load to fail gracefully
+    def test_load_history_empty_file(self):
+        open(HISTORY_FILE, 'w').close()  # Create empty file
+        history = load_history()
+        self.assertEqual(history, [])
+
+    def test_save_and_load_with_escaped_filter(self):
+        # Test filter with special characters
+        special_filter = '[{"type": "min", "degree_sum": 6, "count": 2}]'
+        entry = HistoryEntry(4, 2, special_filter, ["H1", "H2"])
+        save_history([entry])
+        history = load_history()
+        self.assertEqual(history[0].filter_str, special_filter)
+        self.assertEqual(history[0].passed_graph_list, ["H1", "H2"])
+
+
+if __name__ == '__main__':
+    unittest.main()
