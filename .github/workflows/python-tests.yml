@@ -31,11 +31,11 @@ jobs:
     - name: Run filter graph tests
       run: |
         source myenv/bin/activate  # Activate the virtual environment from the root
-        cd ShedOfGraphs/graph_processing  # Change to the graph_processing directory
+        cd graph_processing  # Directly change to the graph_processing directory (no need for ShedOfGraphs)
         python3 -m tests.test_filter_graph  # Run the tests
 
     - name: Run history tests
       run: |
         source myenv/bin/activate  # Activate the virtual environment from the root
-        cd ShedOfGraphs/graph_processing  # Change to the graph_processing directory
+        cd graph_processing  # Directly change to the graph_processing directory
         python3 -m tests.test_history  # Run the tests
