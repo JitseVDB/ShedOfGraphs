@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 import json
 import networkx as nx
@@ -192,9 +193,14 @@ def main():
                 # Export the image directly to the folder provided after --export
                 export_graph_image(line, args.image, args.export)
 
-    # Optionally save history after processing
-    # history_entry = HistoryEntry(...)
-    # save_history([history_entry])
+    # Save history after processing
+    entry = HistoryEntry(
+        input_number=input_count,
+        output_number=output_count,
+        filter_str=filter_str,
+        passed_graph_list=passed_graphs
+    )
+    save_history([entry])
 
 if __name__ == "__main__":
     main()
