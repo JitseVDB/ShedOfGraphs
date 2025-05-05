@@ -22,7 +22,6 @@ def export_graph_image(graph6_str: str, image_format: str, output_folder: str) -
 
     Example:
         >>> export_graph_image("E?bg", "png", "./graph_images")
-        Graph saved to: ./graph_images/E_q_bg.png
     """
     try:
         # Convert the graph6 string into a NetworkX graph object
@@ -45,8 +44,6 @@ def export_graph_image(graph6_str: str, image_format: str, output_folder: str) -
     plt.savefig(filepath, format=image_format, bbox_inches='tight')
     plt.close()
 
-    print(f"Graph saved to: {filepath}")
-
 # Example call
 if __name__ == "__main__":
-    export_graph_image("E?bg", "png", "./graph_images")
+    export_graph_image("EUzW", "png", "./graph_images")
