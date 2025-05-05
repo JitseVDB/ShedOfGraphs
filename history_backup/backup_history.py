@@ -20,7 +20,7 @@ def main():
     Main function to perform the backup operation.
     """
     # Define source and destination paths
-    source_file = os.path.expanduser('~/ShedOfGraphs/history.txt')
+    source_file = os.path.expanduser('~/ShedOfGraphs/graph_processing/history.txt')
     backup_dir = os.path.expanduser('~/ShedOfGraphs/.filtered-graphs/')
 
     # Ensure that the backup directory exists

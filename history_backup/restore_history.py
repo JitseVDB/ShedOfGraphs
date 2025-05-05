@@ -18,7 +18,7 @@ import shutil
 
 # Paths
 backup_dir = os.path.expanduser('~/.filtered-graphs/')
-source_file = os.path.expanduser('~/ShedOfGraphs/history.txt')
+source_file = os.path.expanduser('~/ShedOfGraphs/graph_processing/history.txt')
 
 # List all backup files (history_*.txt)
 try:
