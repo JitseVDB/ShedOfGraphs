@@ -28,7 +28,7 @@ echo "Running filter for graphs of order $ORDER with filter:"
 echo "$FILTER_STRING"
 echo "Filtered graphs will be written to separate files per batch, and history will be saved to history.txt."
 
-# Split the graph generation into multiple batches using the 'res/mod' function or another method
+# Split the graph generation into multiple batches
 NUM_BATCHES=4  # Adjust based on how many threads you want to run in parallel
 BATCH_SIZE=$(( $(geng $ORDER | wc -l) / NUM_BATCHES ))  # Calculate the size of each batch
 
