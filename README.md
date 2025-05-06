@@ -46,6 +46,11 @@ The `run_filter.sh` script generates graphs of a specified order and filters the
 ```bash
 ./run_filter.sh 6 '[{"degree_sum": 6, "type": "min", "count": 3}]'
 ```
+The `run_filter_parallel.sh` script generates graphs of a specified order and filters them according to the given rules. The filtering history is saved automatically in `history.txt`.
+
+```bash
+./run_filter_parallel.sh 6 '[{"degree_sum": 6, "type": "exactly", "count": 4}]' --export ./graph_images --image png
+```
 
 This command will:
 - Generate all graphs with 6 vertices.
