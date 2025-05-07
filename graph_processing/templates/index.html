@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Recent Processed Graphs</title>
+    <title>Filter Graphs</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,11 +25,43 @@
             height: auto;
             border-radius: 5px;
         }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
-    <h1>Most Recent 20 Passed Graphs</h1>
+    <h1>Filter Graphs</h1>
 
+    <!-- Form for filtering -->
+    <form action="/filter_graphs" method="POST">
+        <label for="vertices">Number of Vertices:</label>
+        <input type="number" id="vertices" name="vertices" min="0" required>
+
+        <label for="degree_sum">Degree Sum:</label>
+        <input type="number" id="degree_sum" name="degree_sum" min="0" required>
+
+        <label for="filter_type">Filter Type:</label>
+        <select id="filter_type" name="filter_type" required>
+            <option value="min">Min</option>
+            <option value="max">Max</option>
+            <option value="exactly">Exactly</option>
+        </select>
+
+        <label for="count">Count:</label>
+        <input type="number" id="count" name="count" min="0" required>
+
+        <button type="submit">Filter Graphs</button>
+    </form>
+
+    <h2>Most Recent 20 Passed Graphs</h2>
     <table>
         <tr>
             <th>Timestamp</th>
@@ -42,7 +74,6 @@
             <td>{{ graph.timestamp }}</td>
             <td>{{ graph.graph6 }}</td>
             <td>{{ graph.filter }}</td>
-            <!-- Add image element for the processed graph -->
             <td><img src="{{ graph.image_url }}" alt="Graph Image"></td>
         </tr>
         {% endfor %}
