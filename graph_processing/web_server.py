@@ -1,49 +1,44 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 import os
 from datetime import datetime
+from export_graph6toImage import export_graph_image  # Import the graph image export function
 
 # Create a Flask application instance
 app = Flask(__name__)
 
-# Path to the history.txt file (expanded to user's home directory)
+# Paths for the history file and the graph images folder
 HISTORY_PATH = os.path.expanduser("~/ShedOfGraphs/graph_processing/history.txt")
+GRAPH_IMAGES_FOLDER = os.path.join(os.path.expanduser("~"), "ShedOfGraphs", "graph_processing", "graph_images")
+
+# Ensure the images folder exists
+os.makedirs(GRAPH_IMAGES_FOLDER, exist_ok=True)
 
 def load_recent_graphs():
     """
     Reads the history.txt file and extracts the most recent 20 individual passed graphs.
-    
-    Each line in the file represents a filtering session that may pass multiple graphs.
-    This function splits each line into individual graphs, attaches the timestamp and filter
-    used to each graph, and returns a list of the 20 most recent graphs sorted by timestamp.
     
     Returns:
         A list of dictionaries, each with keys: "timestamp", "graph6", and "filter".
     """
     entries = []
 
-    # If the file doesn't exist, return an empty list
     if not os.path.exists(HISTORY_PATH):
         return entries
 
     with open(HISTORY_PATH, "r") as f:
         for line in f:
-            # Each line should have 5 tab-separated fields
             parts = line.strip().split('\t')
             if len(parts) != 5:
-                continue  # skip malformed lines
+                continue
 
             timestamp_str, _, _, filter_used, graph6_list = parts
 
             try:
-                # Parse timestamp into a datetime object
                 timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
             except ValueError:
-                continue  # skip lines with invalid timestamps
+                continue
 
-            # Extract individual graph6 strings
             graphs = graph6_list.split(',')
-
-            # Create a separate entry for each graph6 string
             for graph in graphs:
                 entries.append({
                     "timestamp": timestamp,
@@ -51,23 +46,48 @@ def load_recent_graphs():
                     "filter": filter_used
                 })
 
-    # Sort entries by timestamp (most recent first), and keep only the last 20
     entries.sort(key=lambda x: x["timestamp"], reverse=True)
     return entries[:20]
+
+def get_image_url(graph6_str):
+    """
+    Generates the image for the graph if it doesn't already exist and returns the image URL.
+    
+    Parameters:
+        graph6_str (str): The graph6 string of the graph.
+    
+    Returns:
+        str: The URL to the generated image.
+    """
+    # Safe filename generation for the image
+    safe_graph_name = graph6_str.replace("?", "_q_").replace("/", "_slash_")
+    image_path = os.path.join(GRAPH_IMAGES_FOLDER, f"{safe_graph_name}.png")
+
+    if not os.path.exists(image_path):
+        # Generate the image if it doesn't exist
+        export_graph_image(graph6_str, "png", GRAPH_IMAGES_FOLDER)
+    
+    return f"/static/graph_images/{safe_graph_name}.png"
 
 @app.route("/index")
 def index():
     """
-    Flask route for /index.
-    Loads the 20 most recent processed graphs and renders them in an HTML table.
+    Flask route for /index. Renders the most recent processed graphs and their images.
     
     Returns:
-        Rendered HTML page (index.html) with a table of graph data.
+        Rendered HTML page (index.html) with a table of graph data and images.
     """
     recent_graphs = load_recent_graphs()
+    # Add the image URL for each graph
+    for graph in recent_graphs:
+        graph["image_url"] = get_image_url(graph["graph6"])
+    
     return render_template("index.html", graphs=recent_graphs)
 
-# Start the Flask development server if this file is run directly
+# Serve images from the 'graph_images' folder under '/static/graph_images'
+@app.route("/static/graph_images/<filename>")
+def serve_image(filename):
+    return send_from_directory(GRAPH_IMAGES_FOLDER, filename)
+
 if __name__ == "__main__":
-    # Enable debug mode for development
     app.run(debug=True)

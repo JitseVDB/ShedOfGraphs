@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Recent Processed Graphs</title>
     <style>
-        /* Simple table styling */
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
@@ -21,24 +20,30 @@
         th {
             background-color: #ddd;
         }
+        img {
+            width: 100px;  /* Set a fixed width for images */
+            height: auto;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Most Recent 20 Passed Graphs</h1>
 
-    <!-- HTML table to display graph data -->
     <table>
         <tr>
             <th>Timestamp</th>
             <th>Graph6 String</th>
             <th>Filter Used</th>
+            <th>Graph Image</th>
         </tr>
-        <!-- Iterate over graphs passed from Flask -->
         {% for graph in graphs %}
         <tr>
             <td>{{ graph.timestamp }}</td>
             <td>{{ graph.graph6 }}</td>
             <td>{{ graph.filter }}</td>
+            <!-- Add image element for the processed graph -->
+            <td><img src="{{ graph.image_url }}" alt="Graph Image"></td>
         </tr>
         {% endfor %}
     </table>
