@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for
 from flask import send_from_directory
 import subprocess
@@ -129,4 +130,4 @@ def serve_image(filename):
     return send_from_directory(GRAPH_IMAGES_FOLDER, filename)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
