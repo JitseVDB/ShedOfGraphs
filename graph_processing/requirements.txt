@@ -1,0 +1,4 @@
+networkx==3.4.2
+matplotlib>=3.4.0
+pytest
+flask>=2.0,<3.0

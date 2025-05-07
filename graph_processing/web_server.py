@@ -11,7 +11,7 @@ import json
 app = Flask(__name__)
 
 # Paths for the history file and the graph images folder
-HISTORY_PATH = os.path.expanduser("~/ShedOfGraphs/graph_processing/history.txt")
+HISTORY_PATH = os.path.expanduser("./history.txt")
 GRAPH_IMAGES_FOLDER = os.path.join(os.path.expanduser("~"), "ShedOfGraphs", "graph_processing", "graph_images")
 
 # Ensure the images folder exists
