@@ -26,8 +26,8 @@ Usage:
     python filter_graph.py '<filter_string>'
 
 Example:
-    python filter_graph.py '[{"degree_sum": 6, "type": "min", "count": 3}]'
-    This keeps only graphs with at least 3 edges where the endpoints have degrees summing to 6.
+    python filter_graph.py 6 '[{"degree_sum": 6, "type": "min", "count": 3}]'
+    This keeps only graphs with 6 vertices and at least 3 edges where the endpoints have degrees summing to 6.
 
 Version: 1.0
 """
@@ -40,9 +40,7 @@ def parse_rules(rule_str):
         rule_str (str): A JSON-formatted string representing filtering rules.
 
     Returns:
-        list or dict: A Python object representing the parsed rules. 
-                    The object will be a dictionary if the JSON string represents an object 
-                    or a list if the JSON string represents an array.
+        list: A list of dictionaries representing the parsed rules
 
     Raises:
         SystemExit: If the `rule_str` is not valid JSON, the function prints an error message 
@@ -55,7 +53,7 @@ def parse_rules(rule_str):
         [{'degree_sum': 6, 'type': 'min', 'count': 2}]
     """
     try:
-        rules = json.loads(rule_str) 
+        rules = json.loads(rule_str) #  parse the JSON string using 'json.loads'
         return rules
     except json.JSONDecodeError:
         print("Invalid filter string: not valid JSON")
@@ -69,7 +67,7 @@ def matches_rule(edge, degrees, rule):
     Args:
         edge (tuple): A tuple (u, v) representing an edge in the graph, where `u` and `v` are node IDs.
         degrees (dict): A dictionary mapping node IDs to their respective degrees in the graph.
-        rule (dict): A dictionary representing the filtering rule. The rule should have a key `"degree_sum"`, 
+        rule (dict): A dictionary representing the filtering rule. The rule should contain a key `"degree_sum"`, 
                      which specifies the required sum of the degrees of the two nodes connected by the edge.
 
     Returns:
@@ -82,11 +80,6 @@ def matches_rule(edge, degrees, rule):
         >>> rule = {"degree_sum": 7}
         >>> matches_rule(edge, degrees, rule)
         True
-
-        >>> edge = (1, 3)
-        >>> rule = {"degree_sum": 10}
-        >>> matches_rule(edge, degrees, rule)
-        False
     """
     u, v = edge
     deg_sum = degrees[u] + degrees[v]
@@ -98,10 +91,16 @@ def count_matching_edges(G, rule):
 
     Args:
         G (networkx.Graph): The graph to be analyzed.
-        rule (dict): A dictionary representing the filtering rule. Must contain at least a "degree_sum" key.
+        rule (dict): A dictionary representing the filtering rule.
 
     Returns:
         int: The number of edges that satisfy the rule.
+    
+    Example:
+        >>> G = nx.erdos_renyi_graph(5, 0.5)
+        >>> rule = {"degree_sum": 6}
+        >>> count_matching_edges(G, rule)
+        3
     """
     degrees = dict(G.degree())
     count = 0
@@ -130,7 +129,13 @@ def satisfies_all_rules(G, rules):
         rules (list): A list of rule dictionaries.
 
     Returns:
-        bool: True if all rules are satisfied, False otherwise.
+        bool: `True` if all rules are satisfied, `False` otherwise.
+
+    Example:
+        >>> G = nx.erdos_renyi_graph(5, 0.5)
+        >>> rules = [{"degree_sum": 6, "type": "min", "count": 3}]
+        >>> satisfies_all_rules(G, rules)
+        True
     """
     valid_types = {"min", "max", "exactly"}
     
@@ -152,11 +157,17 @@ def parse_args():
     """
     Parses command line arguments to allow the user to specify filter string,
     export options (image folder and format), and other flags.
+
+    Returns:
+        argparse.Namespace: Parsed command line arguments.
     """
+    # Initializes the 'ArgumentParser' object
     parser = argparse.ArgumentParser(description='Filter graphs and optionally export images.')
     
-    # Optional arguments for exporting images
+    # Required argument for specifying the filter string
     parser.add_argument('filter_string', type=str, help="The filter string in JSON format.")
+
+    # Optional arguments for exporting images
     parser.add_argument('--export', metavar='FOLDER', type=str, help="Export filtered graphs as images to the specified folder.")
     parser.add_argument('--image', metavar='FORMAT', type=str, choices=['png', 'jpg', 'svg'], help="The image format for export.")
     
@@ -164,35 +175,47 @@ def parse_args():
 
 def main():
     """
-    Main entry point of the script.
+    Main entry point of the script. This function processes graphs read from stdin,
+    filters them according to the provided rules, and optionally exports them as images.
+
+    It also saves the processing history after filtering.
     """
+    # Parse command-line arguments
     args = parse_args()
     
+    # Check if image export is requested without specifying a format
     if args.export and not args.image:
         print("Error: You must specify an image format using --image (e.g., png, jpg, svg).")
         sys.exit(1)
 
+    # Parse the filter string provided by the user
     filter_str = args.filter_string
     rules = parse_rules(filter_str)
 
+    # Initialize counters and list for keeping track of processed graphs
     input_count = 0
     output_count = 0
     passed_graphs = []
 
+    # Process each graph from the standard input (stdin)
     for line in sys.stdin:
-        line = line.strip()
-        if not line:
+        line = line.strip() # Remove leading/trailing whitespace
+        if not line: # Skip empty lines
             continue
-        input_count += 1
+
+        input_count += 1 # Increment input graph count
+
+        # Convert graph6 format string to a NetworkX graph object
         G = nx.from_graph6_bytes(line.encode())
         
+        # Check if the graph satisfies all the filtering rules
         if satisfies_all_rules(G, rules):
-            print(line)
-            output_count += 1
-            passed_graphs.append(line)
+            print(line) # Print the graph if it passes the filter
+            output_count += 1 # Increment output graph count
+            passed_graphs.append(line) # Add the graph to the list of passed graphs
             
+            # If image export is requested, export the graph image
             if args.export:
-                # Export the image directly to the folder provided after --export
                 export_graph_image(line, args.image, args.export)
 
     # Save history after processing
