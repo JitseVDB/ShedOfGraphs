@@ -5,19 +5,21 @@ restore_history.py
 This script restores the history file from one of the available backups in ShedOfGraphs.
 
 - Backup directory: ~/.filtered-graphs/
-- Source file: ~/ShedOfGraphs/history.txt
+- Source file: ~/ShedOfGraphs/graph_processing/history.txt
 - Backup filename format: history_YYYYMMDD_HHMM.txt
 
 The script lists all available backups in the backup directory, allows the user to select a backup, 
-and then restores the selected backup over the current history file.
+and then restores the selected backup over the current history file (~/ShedOfGraphs/graph_processing/history.txt).
 If no backups are found, an error message will be displayed.
+Important: This operation overwrites the current history file with the selected backup.
 """
+
 
 import os
 import shutil
 
 # Paths
-backup_dir = os.path.expanduser('~/.filtered-graphs/')
+backup_dir = os.path.expanduser('~/ShedOfGraphs/.filtered-graphs/')
 source_file = os.path.expanduser('~/ShedOfGraphs/graph_processing/history.txt')
 
 # List all backup files (history_*.txt)
