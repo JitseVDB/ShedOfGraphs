@@ -26,7 +26,7 @@ jobs:
         python -m venv myenv  # Create the virtual environment in the root directory
         source myenv/bin/activate  # Activate it from the root directory
         pip install --upgrade pip
-        pip install -r requirements.txt  # Ensure you have a 'requirements.txt' with necessary dependencies
+        pip install -r graph_processing/requirements.txt  # Ensure you have a 'requirements.txt' with necessary dependencies
 
     - name: Run filter graph tests
       run: |
