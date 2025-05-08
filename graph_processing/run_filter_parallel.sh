@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# ===============================================================
+# Script to generate graphs using 'geng', filter them in parallel
+# using a Python script, and optionally export them as images.
+#
+# Usage:
+#   ./run_filter_parallel.sh <order> <filter_string> [--export <folder_path>] [--image <format>]
+#
+# Required:
+#   <order>           : Number of vertices in the graphs to generate (passed to 'geng')
+#   <filter_string>   : Filter rules (as a JSON string) for the Python filter
+#
+# Optional:
+#   --export <folder> : Folder where images of filtered graphs will be saved
+#   --image <format>  : Image format for exported graphs (e.g., png, svg)
+#
+# Output:
+#   - Filtered graph results will be written to batch files in 'graph_batches'
+#   - History is appended to 'history.txt'
+#   - Final combined output is saved in 'graph_batches/final_filtered_graphs.txt'
+#   - If export is enabled, images of passed graphs are saved to the specified folder
+# ===============================================================
+
 # Check that we have exactly 2 arguments (order and filter_string)
 if [ "$#" -lt 2 ]; then
   echo "Usage: $0 <order> <filter_string> [--export <folder_path>] [--image <format>]"

@@ -4,11 +4,16 @@ backup_history.py
 
 This script creates a timestamped backup of the history file used in ShedOfGraphs.
 
-- Source file: ~/ShedOfGraphs/history.txt
+- Source file: ~/ShedOfGraphs/graph_processing/history.txt
 - Backup destination: ~/ShedOfGraphs/.filtered-graphs/
 - Backup filename format: history_YYYYMMDD_HHMM.txt
 
-The script ensures the backup directory exists and does not overwrite previous backups.
+The script ensures that:
+- The backup directory exists or is created.
+- It does not overwrite previous backups by including the current timestamp in the filename.
+- If the source history file does not exist, an error is displayed.
+
+This backup ensures that past graph processing history is preserved for future reference or recovery.
 """
 
 import os

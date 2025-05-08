@@ -7,12 +7,15 @@ def load_history():
     """
     Load the processing history from the history file if it exists.
 
-    This function reads the `history.txt` file, parses each line into a `HistoryEntry`
-    object, and returns a list of all history entries. If the file does not exist,
-    an empty list is returned.
+    This function attempts to read the `history.txt` file, parsing each line into a
+    `HistoryEntry` object. Each line in the file should represent a history entry with
+    the following components: timestamp, input_number, output_number, filter_str, and 
+    passed_graph_list (a comma-separated list of graph identifiers). If the file does not 
+    exist, an empty list is returned.
 
     Returns:
         list: A list of `HistoryEntry` objects representing the history of processed graphs.
+              An empty list is returned if the history file does not exist or is empty.
     """
     history = []  # Initialize an empty list to store history entries
     
@@ -45,13 +48,11 @@ def save_history(history):
 
     This function appends each history entry from the provided list to the `history.txt`
     file. Each entry is written as a tab-delimited string. If the file does not exist,
-    it will be created.
+    it will be created. The function does not overwrite the file but appends to it.
 
     Args:
-        history (list): A list of `HistoryEntry` objects to be saved.
-    
-    Returns:
-        None
+        history (list): A list of `HistoryEntry` objects to be saved. Each entry will be written
+                        as a tab-delimited line in the `history.txt` file.
     """
     # Open the history file in append mode
     with open(HISTORY_FILE, 'a') as file:

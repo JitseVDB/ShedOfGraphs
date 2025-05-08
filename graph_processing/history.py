@@ -4,22 +4,22 @@ class HistoryEntry:
     """
     A class to represent a history entry of processed graphs.
 
-    This class stores the timestamp, number of input and output graphs,
-    the filter applied during the processing, and the list of graphs that
-    passed the filter.
+    This class stores the timestamp of when the entry was created, the number of input
+    and output graphs, the filtering rule applied, and the list of graphs that passed
+    the filter.
 
     Attributes:
     ----------
     timestamp : str
-        The timestamp of when the entry is created, formatted as 'YYYY-MM-DD HH:MM:SS'.
+        The timestamp when the entry was created, formatted as 'YYYY-MM-DD HH:MM:SS'.
     input_number : int
         The number of graphs that were input for processing.
     output_number : int
         The number of graphs that passed the filter during processing.
     filter_str : str
-        The filter that was applied during the graph processing.
+        The filtering rule (in JSON format) applied during the graph processing.
     passed_graph_list : list
-        A list of identifiers for the 20 most recent graphs that passed the filter.
+        A list of identifiers (graph6 strings) for the 20 most recent graphs that passed the filter.
     """
     def __init__(self, input_number, output_number, filter_str, passed_graph_list):
         """
@@ -56,6 +56,11 @@ class HistoryEntry:
         -------
         str
             A tab-delimited string representing the history entry.
+        
+        Example:
+        >>> entry = HistoryEntry(100, 50, '{"degree_sum": 6, "type": "min", "count": 3}', ['E?bg', 'EuZx'])
+        >>> entry.to_line()
+        '2025-05-08 12:30:45\t100\t50\t{"degree_sum": 6, "type": "min", "count": 3}\tE?bg,EuZx'
         """
         # Join the passed graph list into a comma-separated string
         passed_graph_str = ",".join(self.passed_graph_list)
