@@ -150,7 +150,7 @@ To start the web server for your project, you have two options: you can run it d
    ```bash
    python3 webserver.py
    ```
-4. The web server will start and will be accessible at `http://localhost:5000`.
+4. The web server will start and will be accessible at `http://localhost:5000/index`.
 
 #### Option 2: Running with Docker
 
@@ -166,7 +166,7 @@ If you'd prefer to use Docker, follow these steps:
    ```bash
    docker run -p 5000:5000 shed-of-graphs
    ```
-3. The web server will be available at `http://localhost:5000`.
+3. The web server will be available at `http://localhost:5000/index`.
 
 
 ### Continuous Integration (CI) Tests
