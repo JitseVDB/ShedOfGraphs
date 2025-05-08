@@ -3,18 +3,22 @@
 ## Overview
 `Shed of Graphs` is a Python tool that filters graphs based on specific edge conditions involving the sum of the degrees of the incident nodes. The tool processes graphs in the graph6 format, applies user-defined filtering rules, and outputs only those that satisfy the conditions. 
 
-### Filter Conditions:
-- **Minimum**: At least a given number of edges where the sum of the degrees of the incident nodes is a specific value.
-- **Maximum**: At most a given number of edges where the sum of the degrees of the incident nodes is a specific value.
-- **Exactly**: Exactly a given number of edges where the sum of the degrees of the incident nodes is a specific value.
+### Filter Conditions
+
+The filter operates on graphs with a fixed number of vertices and supports conditions based on edge degree sums. Each rule includes:
+
+* **Vertices**: All graphs are filtered based on a fixed number of vertices, as specified when generating graphs.
+* **Degree Sum**: The sum of the degrees of the two nodes at each edge is evaluated.
+* **Type**: The condition applied to the number of matching edges. Supported types:
+
+  * **Minimum**: At least a given number of edges must meet the degree sum.
+  * **Maximum**: At most a given number of edges may meet the degree sum.
+  * **Exactly**: Exactly a given number of edges must meet the degree sum.
+* **Count**: The number of edges required to satisfy the condition.
+
+Each graph is tested against all specified rules and is kept only if it satisfies **all** of them.
 
 Additionally, the tool tracks a **history of processed graphs** and stores key metadata like the number of graphs processed, the filter applied, and the 20 most recent passed graphs.
-
-## Features
-- **Graph Filtering**: Filters graphs based on degree-sum edge conditions.
-- **Flexible Rules**: Supports rules with `min`, `max`, and `exactly` edge count conditions.
-- **History Tracking**: Stores metadata for each filtering session in `history.txt`, including timestamps and processed graphs.
-- **Extensible**: The program can be extended to support more complex filtering logic or additional features.
 
 ## Installation
 
@@ -35,28 +39,54 @@ Additionally, the tool tracks a **history of processed graphs** and stores key m
     pip install -r requirements.txt
     ```
 
-## Usage
-
-To use the filter, you can run the provided **Bash script**, `run_filter.sh`, which simplifies the process of generating graphs and filtering them.
-
-### Usage with the `run_filter.sh` script:
-
-The `run_filter.sh` script generates graphs of a specified order and filters them according to the given rules. The filtering history is saved automatically in `history.txt`.
+4. Building the `geng` tool from the included `nauty2_8_9` directory manually (required if not using Docker)
 
 ```bash
-./run_filter.sh 6 '[{"degree_sum": 6, "type": "min", "count": 3}]'
+cd graph_processing/nauty2_8_9
+./configure
+make
+cp geng /usr/local/bin  # Or another directory in your PATH
 ```
-The `run_filter_parallel.sh` script generates graphs of a specified order and filters them according to the given rules. The filtering history is saved automatically in `history.txt`.
+
+## Usage
+
+### Running the Graph Filter
+
+Once you’ve built `geng` and set up the environment, you can filter graphs using the provided shell scripts.
+
+#### Sequential Filtering
+
+Use `run_filter.sh` to generate and filter graphs sequentially:
+
+```bash
+./run_filter.sh <n> '<filter_rules>' [--export <folder>] [--image <format>]
+```
+
+**Example:**
+
+```bash
+./run_filter.sh 6 '[{"degree_sum": 6, "type": "exactly", "count": 4}]' --export ./graph_images --image png
+```
+
+This command generates all graphs with 6 nodes and filters them according to the specified rules. Matching graphs can optionally be exported as image files (e.g., png or svg) to the specified folder.
+
+#### Parallel Filtering
+
+To process graphs faster using multiple CPU cores, use the parallel version:
+
+```bash
+./run_filter_parallel.sh <n> '<filter_rules>' [--export <folder>] [--image <format>]
+```
+
+**Example:**
 
 ```bash
 ./run_filter_parallel.sh 6 '[{"degree_sum": 6, "type": "exactly", "count": 4}]' --export ./graph_images --image png
 ```
 
-This command will:
-- Generate all graphs with 6 vertices.
-- Filter the graphs with at least 3 edges where the sum of the degrees of the incident nodes is 6.
-- Print the filtered graph6 strings to the console.
-- Save the history of this session, including the timestamp and filter applied, to `history.txt`.
+This functions the same as the sequential version but speeds up processing by distributing the workload.
+
+The filtered graph information is logged in `graph_processing/history.txt`.
 
 ### Example of `history.txt` Format:
 
@@ -87,65 +117,57 @@ Then add this line to the crontab file:
 ```bash
 0 * * * * /usr/bin/python3 /home/ShedOfGraphs/history_backup/backup_history.py
 ```
+### Restoring a Backup of History
 
-## **Setting Up Plantri**
+If you want to restore a previous version of your `history.txt` file (e.g. after accidentally modifying or deleting it), you can use the `restore_history.py` script.
 
-To use the graph generation and filtering scripts in this project, you need to install **Plantri**. Below is a step-by-step guide to set it up.
+#### Steps:
 
-### **1. Download Plantri**
+1. Open a terminal.
+2. Run the script:
 
-1. **Visit the Plantri website** or use the following link: [Plantri GitHub or official site](http://www.maths.qmul.ac.uk/~pjc/plantri/).
-2. Download the **tar.gz** file for Plantri (e.g., `plantri55.tar.gz`).
+   ```bash
+   python3 graph_processing/restore_history.py
+   ```
+3. A list of available backups will be shown (these are located in `~/.filtered-graphs/` and named like `history_YYYYMMDD_HHMM.txt`).
+4. Enter the number corresponding to the backup you want to restore.
+5. The selected backup will replace the current `history.txt` file in `graph_processing/`.
 
-### **2. Extract the Files**
+#### Notes:
 
-Once the **tar.gz** file is downloaded, follow these steps to extract it:
+* Backups must exist in the `.filtered-graphs` folder for this to work.
 
-```bash
-tar -xzvf plantri55.tar.gz
-```
+### Running the Web Server
 
-This will extract the contents into a folder named `plantri55`.
+To start the web server for your project, you have two options: you can run it directly using Python or use Docker.
 
-### **3. Compile Plantri**
+#### Option 1: Running with Python
 
-Navigate to the extracted folder and run the `make` command to compile Plantri:
+1. Open a terminal.
+2. Navigate to the `graph_processing` directory where the `webserver.py` script is located.
+3. Run the web server with:
 
-```bash
-cd plantri55
-make
-```
+   ```bash
+   python3 webserver.py
+   ```
+4. The web server will start and will be accessible at `http://localhost:5000`.
 
-This will generate the `plantri` executable.
+#### Option 2: Running with Docker
 
-### **4. Move Plantri to a Global Directory (Optional)**
+If you'd prefer to use Docker, follow these steps:
 
-If you want to run `plantri` from anywhere on your system, move it to a directory in your `PATH` (e.g., `/usr/local/bin/`):
+1. First, build the Docker image:
 
-```bash
-sudo mv plantri /usr/local/bin/
-```
+   ```bash
+   docker build -t shed-of-graphs .
+   ```
+2. Then, run the container:
 
-### **5. Test Plantri**
+   ```bash
+   docker run -p 5000:5000 shed-of-graphs
+   ```
+3. The web server will be available at `http://localhost:5000`.
 
-To verify that Plantri is installed correctly, run:
 
-```bash
-plantri
-```
-
-This should display the Plantri command-line interface, confirming that it’s working properly.
-
-### **6. Usage Example**
-
-You can now use Plantri to generate graphs. For example, to generate graphs with 6 vertices and the symmetry `res=0 mod=4`, run:
-
-```bash
-plantri 6 0 4
-```
-
-You can also output the graphs to a file:
-
-```bash
-plantri 6 0 4 output.g6
-```
+### Continuous Integration (CI) Tests
+The project includes a CI pipeline (configured via GitHub Actions) to run tests automatically whenever code is pushed to the repository ensuring everything works correctly.
